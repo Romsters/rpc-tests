@@ -1,13 +1,16 @@
-import { describe, expect, } from "@jest/globals";
-import getBalance from "./index";
-import baseTypes from "../../../utils/baseTypes";
+import { describe } from "@jest/globals";
+import eth_getBalance from "./index";
+import evaluateResponse from "../../../utils/evaluateResponse";
+import patternGenerator from "../../../utils/patternGenerator";
 
 describe("eth_getBalance", () => {
-  it("returns the balance of the account of given address", async () => {
-    const { jsonrpc, id, result } = await getBalance();
-    
-    expect(jsonrpc).toBe("2.0");
-    expect(id).toBe(1);
-    expect(result).toMatch(baseTypes.uint.pattern);
+  it("Returns the balance of the account of given address.", async () => {
+    evaluateResponse({
+      response: await eth_getBalance(), 
+      pattern: await patternGenerator.buildStringPattern({
+        rpcDefinitionPath: "../execution-apis/src/eth/state.yaml",
+        rpcName: "eth_getBalance",
+      }),
+    });
   });
 });

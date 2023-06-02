@@ -2,7 +2,7 @@
   "name": "rpc-tests",
   "version": "1.0.0",
   "description": "Test suite for the EON node RPC interface.",
-  "author": "Fabian Vogelsteller <fabian@frozeman.de>",
+  "author": "Horizen Labs <info@horizenlabs.io>",
   "main": "index",
   "scripts": {
     "test": "jest"
@@ -24,6 +24,8 @@
     "typescript": "5.0.4"
   },
   "dependencies": {
-    "axios": "1.4.0"
+    "axios": "1.4.0",
+    "dotenv": "16.0.3",
+    "yaml": "2.3.0"
   }
 }

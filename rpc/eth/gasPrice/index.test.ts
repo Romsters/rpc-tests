@@ -1,13 +1,16 @@
-import { describe, expect, } from "@jest/globals";
-import gasPrice from "./index";
-import baseTypes from "../../../utils/baseTypes";
+import { describe } from "@jest/globals";
+import eth_gasPrice from "./index";
+import evaluateResponse from "../../../utils/evaluateResponse";
+import patternGenerator from "../../../utils/patternGenerator";
 
 describe("eth_gasPrice", () => {
-  it("returns the current price per gas in wei", async () => {
-    const { jsonrpc, id, result } = await gasPrice();
-    
-    expect(jsonrpc).toBe("2.0");
-    expect(id).toBe(1);
-    expect(result).toMatch(baseTypes.uint.pattern);
+  it("Returns the current price per gas in wei.", async () => {
+    evaluateResponse({
+      response: await eth_gasPrice(), 
+      pattern: await patternGenerator.buildStringPattern({
+        rpcDefinitionPath: "../execution-apis/src/eth/fee_market.yaml",
+        rpcName: "eth_gasPrice",
+      }),
+    });
   });
 });
