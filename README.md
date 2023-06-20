@@ -29,13 +29,13 @@ To run the tests, simply issue:
 
 You can run tests for a specific RPC namespace such as `rpc/eth` by issuing the following command:
 
-    npm run test rpc/eth
+    npm run test rpc/eth;
 
 ### Running test for a specific RPC method
 
 You can run tests for a specific RPC method such as `rpc/eth/feeHistory` by issuing the following command:
 
-    npm run test rpc/eth/feeHistory
+    npm run test rpc/eth/feeHistory;
 
 Have a look at the `rpc/eth` directory for the list of supported RPC methods that can be tested.
 
