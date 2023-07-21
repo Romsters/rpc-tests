@@ -1,5 +1,11 @@
+# directories
 /node_modules
+
+# files
 .env
 .idea
-execution-apis
 .gitmodules
+test-report.html
+
+# submodules
+execution-apis
