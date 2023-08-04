@@ -5,11 +5,10 @@ cache:
   directories:
     - node_modules
 before_install:
-  - git clone https://github.com/ethereum/execution-apis.git
+  - git submodule add --force https://github.com/ethereum/execution-apis.git
+  - git submodule update --init
 install:
   - npm install
-before_script:
-  - cp -R execution-apis/* ./
 script:
   - if [ "$TEST_ENV" = "local" ]; then npm run test-local; fi
   - if [ "$TEST_ENV" = "pregobi" ]; then npm run test-pregobi; fi
