@@ -43,7 +43,7 @@ function type(value) {
 }
 
 function testString(value, pattern) {
-  if (process.env.DEV_MODE) {
+  if (process.env.DEV_MODE === "true") {
     console.log(`performing test on:\n-------------------\nvalue:   ${value}\npattern: ${pattern}`);
   }
   
@@ -130,7 +130,7 @@ function evaluateResponse({ response, pattern }) {
   expect(id).toBe(fixtures.id);
   reduceValue(value, pattern);
 
-  if (process.env.DEV_MODE) {
+  if (process.env.DEV_MODE === "true") {
     console.log("response:", response, "\n", "pattern:",pattern);
   }
 }
