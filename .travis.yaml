@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - '16'
+cache:
+  directories:
+    - node_modules
+install:
+  - npm install
+script:
+  - if [ "$TEST_ENV" = "local" ]; then npm run test-local; fi
+  - if [ "$TEST_ENV" = "pregobi" ]; then npm run test-pregobi; fi
+  - if [ "$TEST_ENV" = "gobi" ]; then npm run test-gobi; fi
+  - if [ "$TEST_ENV" = "eon" ]; then npm run test-eon; fi
