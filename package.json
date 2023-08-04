@@ -5,7 +5,10 @@
   "author": "Horizen Labs <info@horizenlabs.io>",
   "main": "index",
   "scripts": {
-    "test": "jest --config=jest.config.js"
+    "test-local": "cp .env.local .env && jest --config=jest.config.local.js",
+    "test-pregobi": "cp .env.dev .env && jest --config=jest.config.pregobi.js",
+    "test-gobi": "cp .env.gobi .env && jest --config=jest.config.gobi.js",
+    "test-eon": "cp .env.eon .env && jest --config=jest.config.eon.js"
   },
   "jest": {
     "transform": {
