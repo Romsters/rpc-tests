@@ -6,7 +6,7 @@
   "main": "index",
   "scripts": {
     "test-local": "cp .env.local .env && jest --config=jest.config.local.js",
-    "test-pregobi": "cp .env.dev .env && jest --config=jest.config.pregobi.js",
+    "test-pregobi": "cp .env.pregobi .env && jest --config=jest.config.pregobi.js",
     "test-gobi": "cp .env.gobi .env && jest --config=jest.config.gobi.js",
     "test-eon": "cp .env.eon .env && jest --config=jest.config.eon.js"
   },
@@ -29,7 +29,9 @@
   },
   "dependencies": {
     "axios": "1.4.0",
+    "bn": "^1.0.5",
     "dotenv": "16.0.3",
+    "web3": "^4.1.1",
     "yaml": "2.3.0"
   }
 }

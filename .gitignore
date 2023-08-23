@@ -5,8 +5,10 @@
 .env
 .idea
 .gitmodules
-test-report.html
+test-report-*.html
 
 # submodules
 execution-apis
 
+execution-apis
+.gitmodules
