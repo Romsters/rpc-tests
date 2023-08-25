@@ -20,11 +20,11 @@ install:
 
 script:
   # Test Commands
-  - if [ "$TEST_ENV" = "local" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-local > /usr/src/app/test_output.txt; fi
-  - if [ "$TEST_ENV" = "pregobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi > /usr/src/app/test_output.txt; fi
-  - if [ "$TEST_ENV" = "gobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi > /usr/src/app/test_output.txt; fi
-  - if [ "$TEST_ENV" = "eon" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon > /usr/src/app/test_output.txt; fi
-
+  - if [ "$TEST_ENV" = "local" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-local > test_output.txt; fi
+  - if [ "$TEST_ENV" = "pregobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi > test_output.txt; fi
+  - if [ "$TEST_ENV" = "gobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi > test_output.txt; fi
+  - if [ "$TEST_ENV" = "eon" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon > test_output.txt; fi
+  - 
   # Extract Test Suites data
   - failed_suites=$(awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}' test_output.txt)
   - passed_suites=$(awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}' test_output.txt)
