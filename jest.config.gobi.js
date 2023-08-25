@@ -13,7 +13,7 @@ const config = {
 
 function getReportPath(testEnv) {
   const timestamp = new Date().toISOString().replace(/:/g, "-").slice(0, -5);
-  return `./test-report-${testEnv}-${timestamp}.html`;
+  return `./reports/test-report-${testEnv}-${timestamp}.html`;
 }
 
 module.exports = config;
