@@ -20,36 +20,48 @@ install:
 
 script:
   # Test Commands
-  - if [ "$TEST_ENV" = "local" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-local > test_output.txt; fi
-  - if [ "$TEST_ENV" = "pregobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi > test_output.txt; fi
-  - if [ "$TEST_ENV" = "gobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi > test_output.txt; fi
-  - if [ "$TEST_ENV" = "eon" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon > test_output.txt; fi
+  - >
+    if [ "$TEST_ENV" = "local" ]; then 
+      TEST_OUTPUT=$(docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-local 2>&1);
+    fi
+  - >
+    if [ "$TEST_ENV" = "pregobi" ]; then 
+      TEST_OUTPUT=$(docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi 2>&1);
+    fi
+  - >
+    if [ "$TEST_ENV" = "gobi" ]; then 
+      TEST_OUTPUT=$(docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi 2>&1);
+    fi
+  - >
+    if [ "$TEST_ENV" = "eon" ]; then 
+      TEST_OUTPUT=$(docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon 2>&1);
+    fi
+
+  - echo "$TEST_OUTPUT";
 
   # Extract Test Suites data
-  - failed_suites=$(awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}' test_output.txt)
-  - passed_suites=$(awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}' test_output.txt)
-  - total_suites=$(awk -F':|,' '/Test Suites:/ {print $NF}' test_output.txt | awk '{print $1}')
+  - failed_suites=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}')
+  - passed_suites=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}')
+  - total_suites=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Test Suites:/ {print $NF}' | awk '{print $1}')
 
   # Extract Tests data
-  - failed_tests=$(awk -F':|,' '/Tests:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}' test_output.txt)
-  - passed_tests=$(awk -F':|,' '/Tests:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}' test_output.txt)
-  - total_tests=$(awk -F':|,' '/Tests:/ {print $NF}' test_output.txt | awk '{print $1}')
+  - failed_tests=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Tests:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}')
+  - passed_tests=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Tests:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}')
+  - total_tests=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Tests:/ {print $NF}' | awk '{print $1}')
 
   # Extract Time data
-  - total_time=$(awk -F':| ' '/Time:/ {print $2}' test_output.txt)
+  - total_time=$(echo "$TEST_OUTPUT" | awk -F':| ' '/Time:/ {print $2}')
 
   # Default to 0 if values are empty
   - "[ -z \"$failed_suites\" ] && failed_suites=0"
   - "[ -z \"$passed_suites\" ] && passed_suites=0"
   - "[ -z \"$failed_tests\" ] && failed_tests=0"
   - "[ -z \"$passed_tests\" ] && passed_tests=0"
-
-  # Debugging
-  - cat test_output.txt
+  - "[ -z \"$total_tests\" ] && total_tests=0"
+  - "[ -z \"$total_time\" ] && total_time=0"
 
   # Send data to Slack
   - >
     curl -X POST -H 'Content-type: application/json'
     --data "{\"failed_suites\": \"$failed_suites\", \"passed_suites\": \"$passed_suites\", \"total_suites\": \"$total_suites\", \"failed_tests\": \"$failed_tests\", \"passed_tests\": \"$passed_tests\", \"total_tests\": \"$total_tests\", \"total_time\": \"$total_time\", \"build_url\": \"$TRAVIS_BUILD_WEB_URL\"}"
     $SLACK_WEBHOOK_URL
-
