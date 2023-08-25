@@ -20,8 +20,5 @@ export const getCurrentDateTokens = (baseName: string, abbreviation: string): { 
     const fullName = `${baseName}_${day}${month}${year}`;
     const shortName = `${abbreviation}_${day}${month}${year}`;
 
-    console.log(fullName);
-    console.log(shortName);
-
     return { fullName, shortName };
 }

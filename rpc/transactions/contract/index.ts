@@ -4,6 +4,7 @@ import Router from "../../../node_modules/@uniswap/v2-periphery/build/UniswapV2R
 import ERC20 from "../../../node_modules/@openzeppelin/contracts/build/contracts/ERC20PresetFixedSupply.json";
 import Pair from "../../../node_modules/@uniswap/v2-core/build/UniswapV2Pair.json";
 import WETH from "../../../node_modules/canonical-weth/build/contracts/WETH9.json";
+import { Contract } from "web3-eth-contract"
 import {getCurrentDateTokens} from "../../../utils/web3utils";
 
 export const deployWeth: (web3: Web3, sender: string) => Promise<string | undefined> = async (web3, sender) => {
@@ -88,9 +89,9 @@ export const deployRouter = async ( web3: Web3, factoryAddress: string, wethAddr
     // @ts-ignore
     router = await router
         .deploy({ data: Router.bytecode, arguments: [factoryAddress, wethAddress] })
-        .send({ from: sender, gas: GasLimit, gasPrice: GasPrice });
+        .send({ from: sender, gas: estimatedGas });
 
-    console.log("router address", router.options.address);
+    console.log("Router address", router.options.address);
 
     return router.options.address;
 }
@@ -115,67 +116,145 @@ export const deployFactory = async (web3: Web3, sender: string): Promise<string 
 
 export const approve = async (
     web3: Web3,
-    tokenAddress: string,
+    tokenContract: Contract<any>,
     spender: string,
     amount: string,
     sender: string
 ): Promise<{transactionHash?: string, receipt?: any}> => {
-    const tokenContract = new web3.eth.Contract(ERC20.abi as any, tokenAddress);
+    let estimatedGas;
 
-    let transactionHash: string | undefined;
-    let receipt: any;
+    try {
+        // @ts-ignore
+        estimatedGas = await tokenContract.methods
+            .approve(spender, amount)
+            .estimateGas({ from: sender });
+
+        console.log("Estimated Gas:", estimatedGas);
+    } catch (error) {
+        console.error("Error estimating gas:", error);
+        throw error;
+    }
+
+    const nonce = await web3.eth.getTransactionCount(sender);
+    const gasPrice = await web3.eth.getGasPrice();
 
     // @ts-ignore
-    await tokenContract.methods
-        .approve(spender, amount)
-        .send({ from: sender, gas: GasLimit, gasPrice: GasPrice })
-        .on("transactionHash", function (hash) {
-            console.log(sender + ": transaction hash", hash);
-            transactionHash = hash;
-        })
-        .on("receipt", function (rec) {
-            receipt = rec;
-        });
+    const tx = {
+        to: tokenContract.options.address,
+        data: tokenContract.methods.approve(spender, amount).encodeABI(),
+        gas: estimatedGas,
+        gasPrice: web3.utils.toHex(gasPrice),
+        nonce: web3.utils.toHex(nonce),
+    };
 
-    return { transactionHash, receipt };
+    const signedTx = await web3.eth.accounts.signTransaction(tx, process.env.SEND_FROM_PK);
+
+    const transactionHashPromise = new Promise<string>((resolve, reject) => {
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction!)
+            .on('transactionHash', function (hash) {
+                resolve(hash.toString());
+            })
+            .on('error', reject);
+    });
+
+    const receiptPromise = new Promise<any>((resolve, reject) => {
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction!)
+            .on('receipt', function (rec) {
+                resolve(rec);
+            })
+            .on('error', reject);
+    });
+
+    try {
+        const [transactionHash, receipt] = await Promise.all([transactionHashPromise, receiptPromise]);
+        return { transactionHash, receipt };
+    } catch (error) {
+        console.error("Error sending transaction:", error);
+        throw error;
+    }
 }
 
-interface TransferResult {
-    recipient: string;
-    transactionHash?: string;
-    receipt?: any;
-}
-
-export const transferTokens = async (
+export const addLiquidity = async (
     web3: Web3,
-    tokenContractAddress: string,
-    amount: string,
-    sender: string
-): Promise<TransferResult> => {
-    const tokenContract = new web3.eth.Contract(ERC20.abi as any, tokenContractAddress);
+    routerContract: Contract<any>,
+    tokenAAddress: string,
+    tokenBAddress: string,
+    amountADesired: string,
+    amountBDesired: string,
+    amountAMin: string,
+    amountBMin: string,
+    sender: string,
+    deadline: string
+): Promise<{transactionHash?: string, receipt?: any}> => {
+    let estimatedGas;
 
-    let transactionHash: string | undefined;
-    let receipt: any;
+    try {
+        // @ts-ignore
+        estimatedGas = await routerContract.methods
+            .addLiquidity(
+                tokenAAddress,
+                tokenBAddress,
+                amountADesired,
+                amountBDesired,
+                amountAMin,
+                amountBMin,
+                sender,
+                deadline
+            )
+            .estimateGas({ from: sender });
+
+        console.log("Estimated Gas:", estimatedGas);
+    } catch (error) {
+        console.error("Error estimating gas:", error);
+        throw error;
+    }
+
+    const nonce = await web3.eth.getTransactionCount(sender);
+    const gasPrice = await web3.eth.getGasPrice();
 
     // @ts-ignore
-    const estimatedGas = await tokenContract.methods
-        .transfer(sender, amount)
-        .estimateGas({ from: sender });
+    const tx = {
+        to: routerContract.options.address,
+        data: routerContract.methods.addLiquidity(
+            tokenAAddress,
+            tokenBAddress,
+            amountADesired,
+            amountBDesired,
+            amountAMin,
+            amountBMin,
+            sender,
+            deadline
+        ).encodeABI(),
+        gas: estimatedGas,
+        gasPrice: web3.utils.toHex(gasPrice),
+        nonce: web3.utils.toHex(nonce),
+    };
 
-    // @ts-ignore
-    await tokenContract.methods
-        .transfer(sender, amount)
-        .send({ from: sender, gas: estimatedGas })
-        .on("transactionHash", function (hash) {
-            console.log(sender + " transaction hash", hash);
-            transactionHash = hash;
-        })
-        .on("receipt", function (rec) {
-            console.log(sender + " receipt", rec);
-            receipt = rec;
-        });
+    const signedTx = await web3.eth.accounts.signTransaction(tx, process.env.SEND_FROM_PK);
 
-    return { recipient: sender, transactionHash, receipt };
+    const transactionHashPromise = new Promise<string>((resolve, reject) => {
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction!)
+            .on('transactionHash', function (hash) {
+                resolve(hash.toString());
+            })
+            .on('error', reject);
+    });
+
+    const receiptPromise = new Promise<any>((resolve, reject) => {
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction!)
+            .on('receipt', function (rec) {
+                resolve(rec);
+            })
+            .on('error', reject);
+    });
+
+    try {
+        const [transactionHash, receipt] = await Promise.all([transactionHashPromise, receiptPromise]);
+        return { transactionHash, receipt };
+    } catch (error) {
+        console.error("Error sending transaction:", error);
+        throw error;
+    }
 }
 
 export const getTokenBalance = async (
