@@ -19,7 +19,34 @@ install:
   - npm install
 
 script:
-  - if [ "$TEST_ENV" = "local" ]; then docker run -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-local; fi
-  - if [ "$TEST_ENV" = "pregobi" ]; then docker run -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi; fi
-  - if [ "$TEST_ENV" = "gobi" ]; then docker run -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi; fi
-  - if [ "$TEST_ENV" = "eon" ]; then docker run -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon; fi
+  # Test Commands
+  - if [ "$TEST_ENV" = "local" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-local > /usr/src/app/test_output.txt; fi
+  - if [ "$TEST_ENV" = "pregobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi > /usr/src/app/test_output.txt; fi
+  - if [ "$TEST_ENV" = "gobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi > /usr/src/app/test_output.txt; fi
+  - if [ "$TEST_ENV" = "eon" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon > /usr/src/app/test_output.txt; fi
+
+  # Extract Test Suites data
+  - failed_suites=$(awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}' test_output.txt)
+  - passed_suites=$(awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}' test_output.txt)
+  - total_suites=$(awk -F':|,' '/Test Suites:/ {print $NF}' test_output.txt | awk '{print $1}')
+
+  # Extract Tests data
+  - failed_tests=$(awk -F':|,' '/Tests:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}' test_output.txt)
+  - passed_tests=$(awk -F':|,' '/Tests:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}' test_output.txt)
+  - total_tests=$(awk -F':|,' '/Tests:/ {print $NF}' test_output.txt | awk '{print $1}')
+
+  # Extract Time data
+  - total_time=$(awk -F':| ' '/Time:/ {print $2}' test_output.txt)
+
+  # Default to 0 if values are empty
+  - "[ -z \"$failed_suites\" ] && failed_suites=0"
+  - "[ -z \"$passed_suites\" ] && passed_suites=0"
+  - "[ -z \"$failed_tests\" ] && failed_tests=0"
+  - "[ -z \"$passed_tests\" ] && passed_tests=0"
+
+  # Send data to Slack
+  - >
+    curl -X POST -H 'Content-type: application/json'
+    --data "{\"failed_suites\": \"$failed_suites\", \"passed_suites\": \"$passed_suites\", \"total_suites\": \"$total_suites\", \"failed_tests\": \"$failed_tests\", \"passed_tests\": \"$passed_tests\", \"total_tests\": \"$total_tests\", \"total_time\": \"$total_time\", \"build_url\": \"$TRAVIS_BUILD_WEB_URL\"}"
+    $SLACK_WEBHOOK_URL
+
