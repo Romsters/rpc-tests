@@ -50,7 +50,7 @@ script:
   - total_tests=$(echo "$TEST_OUTPUT" | awk -F' ' '/Tests:/ { for(i=1; i<=NF; i++) if($i ~ /total/) print $(i-1)}')
 
   # Extract Time data
-  - total_time=$(echo "$TEST_OUTPUT" | awk -F'Time:' '{print $2}' | awk '{$1=$1};1')
+  - total_time=$(echo "$TEST_OUTPUT" | awk -F'Time:' '{print $2}' | tr -d '[:space:]')
 
   # Default to 0 if values are empty
   - "[ -z \"$failed_suites\" ] && failed_suites=0"
