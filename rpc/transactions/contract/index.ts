@@ -128,8 +128,6 @@ export const approve = async (
         estimatedGas = await tokenContract.methods
             .approve(spender, amount)
             .estimateGas({ from: sender });
-
-        console.log("Estimated Gas:", estimatedGas);
     } catch (error) {
         console.error("Error estimating gas:", error);
         throw error;
@@ -202,8 +200,6 @@ export const addLiquidity = async (
                 deadline
             )
             .estimateGas({ from: sender });
-
-        console.log("Estimated Gas:", estimatedGas);
     } catch (error) {
         console.error("Error estimating gas:", error);
         throw error;
