@@ -1,0 +1,25 @@
+language: node_js
+
+node_js:
+  - '16'
+
+services:
+  - docker
+
+cache:
+  directories:
+    - node_modules
+
+before_install:
+  - git submodule add --force https://github.com/ethereum/execution-apis.git
+  - git submodule update --init
+  - docker build -t rpc-tests .
+
+install:
+  - npm install
+
+script:
+  - if [ "$TEST_ENV" = "local" ]; then docker run -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-local; fi
+  - if [ "$TEST_ENV" = "pregobi" ]; then docker run -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi; fi
+  - if [ "$TEST_ENV" = "gobi" ]; then docker run -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi; fi
+  - if [ "$TEST_ENV" = "eon" ]; then docker run -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon; fi

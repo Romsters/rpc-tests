@@ -1,11 +1,12 @@
 # directories
 /node_modules
+/reports
 
 # files
 .env
 .idea
 .gitmodules
-test-report.html
+.html
 
 # submodules
 execution-apis
