@@ -53,12 +53,12 @@ script:
   - total_time=$(echo "$TEST_OUTPUT" | awk -F'Time:' '{print $2}' | tr -d '[:space:]')
 
   # Default to 0 if values are empty
-  - "[ -z \"$failed_suites\" ] && failed_suites=0"
-  - "[ -z \"$passed_suites\" ] && passed_suites=0"
-  - "[ -z \"$failed_tests\" ] && failed_tests=0"
-  - "[ -z \"$passed_tests\" ] && passed_tests=0"
-  - "[ -z \"$total_tests\" ] && total_tests=0"
-  - "[ -z \"$total_time\" ] && total_time=0"
+  - "[ -z \"$failed_suites\" ] && failed_suites=0 || true"
+  - "[ -z \"$passed_suites\" ] && passed_suites=0 || true"
+  - "[ -z \"$failed_tests\" ] && failed_tests=0 || true"
+  - "[ -z \"$passed_tests\" ] && passed_tests=0 || true"
+  - "[ -z \"$total_tests\" ] && total_tests=0 || true"
+  - "[ -z \"$total_time\" ] && total_time=0 || true"
 
   # Send data to Slack
   - >
