@@ -24,7 +24,7 @@ script:
   - if [ "$TEST_ENV" = "pregobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi > test_output.txt; fi
   - if [ "$TEST_ENV" = "gobi" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi > test_output.txt; fi
   - if [ "$TEST_ENV" = "eon" ]; then docker run -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon > test_output.txt; fi
-  - 
+  -
   # Extract Test Suites data
   - failed_suites=$(awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}' test_output.txt)
   - passed_suites=$(awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}' test_output.txt)
@@ -43,6 +43,15 @@ script:
   - "[ -z \"$passed_suites\" ] && passed_suites=0"
   - "[ -z \"$failed_tests\" ] && failed_tests=0"
   - "[ -z \"$passed_tests\" ] && passed_tests=0"
+
+  # Debugging echos
+  - "echo 'Failed Suites: $failed_suites'"
+  - "echo 'Passed Suites: $passed_suites'"
+  - "echo 'Total Suites: $total_suites'"
+  - "echo 'Failed Tests: $failed_tests'"
+  - "echo 'Passed Tests: $passed_tests'"
+  - "echo 'Total Tests: $total_tests'"
+  - "echo 'Total Time: $total_time'"
 
   # Send data to Slack
   - >
