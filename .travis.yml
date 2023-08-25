@@ -45,13 +45,13 @@ script:
   - "[ -z \"$passed_tests\" ] && passed_tests=0"
 
   # Debugging echos
-  - "echo 'Failed Suites: $failed_suites'"
-  - "echo 'Passed Suites: $passed_suites'"
-  - "echo 'Total Suites: $total_suites'"
-  - "echo 'Failed Tests: $failed_tests'"
-  - "echo 'Passed Tests: $passed_tests'"
-  - "echo 'Total Tests: $total_tests'"
-  - "echo 'Total Time: $total_time'"
+  - "echo \"Failed Suites: $failed_suites\""
+  - "echo \"Passed Suites: $passed_suites\""
+  - "echo \"Total Suites: $total_suites\""
+  - "echo \"Failed Tests: $failed_tests\""
+  - "echo \"Passed Tests: $passed_tests\""
+  - "echo \"Total Tests: $total_tests\""
+  - "echo \"Total Time: $total_time\""
 
   # Send data to Slack
   - >
