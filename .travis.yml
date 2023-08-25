@@ -40,17 +40,17 @@ script:
   - echo "$TEST_OUTPUT";
 
   # Extract Test Suites data
-  - failed_suites=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}')
-  - passed_suites=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Test Suites:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}')
-  - total_suites=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Test Suites:/ {print $NF}' | awk '{print $1}')
+  - failed_suites=$(echo "$TEST_OUTPUT" | awk -F' ' '/Test Suites:/ { for(i=1; i<=NF; i++) if($i ~ /failed/) print $(i-1)}')
+  - passed_suites=$(echo "$TEST_OUTPUT" | awk -F' ' '/Test Suites:/ { for(i=1; i<=NF; i++) if($i ~ /passed/) print $(i-1)}')
+  - total_suites=$(echo "$TEST_OUTPUT" | awk -F' ' '/Test Suites:/ { for(i=1; i<=NF; i++) if($i ~ /total/) print $(i-1)}')
 
   # Extract Tests data
-  - failed_tests=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Tests:/ { for(i=1;i<=NF;i++) if($i ~ /failed/) print $(i-1)}')
-  - passed_tests=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Tests:/ { for(i=1;i<=NF;i++) if($i ~ /passed/) print $(i-1)}')
-  - total_tests=$(echo "$TEST_OUTPUT" | awk -F':|,' '/Tests:/ {print $NF}' | awk '{print $1}')
+  - failed_tests=$(echo "$TEST_OUTPUT" | awk -F' ' '/Tests:/ { for(i=1; i<=NF; i++) if($i ~ /failed/) print $(i-1)}')
+  - passed_tests=$(echo "$TEST_OUTPUT" | awk -F' ' '/Tests:/ { for(i=1; i<=NF; i++) if($i ~ /passed/) print $(i-1)}')
+  - total_tests=$(echo "$TEST_OUTPUT" | awk -F' ' '/Tests:/ { for(i=1; i<=NF; i++) if($i ~ /total/) print $(i-1)}')
 
   # Extract Time data
-  - total_time=$(echo "$TEST_OUTPUT" | awk -F':| ' '/Time:/ {print $2}')
+  - total_time=$(echo "$TEST_OUTPUT" | awk -F'Time:' '{print $2}' | awk '{$1=$1};1')
 
   # Default to 0 if values are empty
   - "[ -z \"$failed_suites\" ] && failed_suites=0"
