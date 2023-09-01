@@ -21,6 +21,13 @@ Issue the following commands:
     npm install;
     cp .env.gobi .env;
 
+## debug_* calls
+
+These tests require basic auth username and password to be set:
+
+    RPC_USERNAME=
+    RPC_PASSWORD=
+
 ## Send Transaction Tests
 
 These tests require adding the Private Key (PK) of the sending wallet to the .env as:
