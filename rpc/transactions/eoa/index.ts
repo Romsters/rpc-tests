@@ -15,12 +15,21 @@ const sendTransaction = async (web3: Web3, privateKey: string, toAddress: string
 
     const account = web3.eth.accounts.privateKeyToAccount(formatPrivateKey(web3, privateKey));
 
+    let nonce;
+    try {
+        nonce = await web3.eth.getTransactionCount(account.address, 'pending');
+    } catch (error) {
+        console.error("Failed to fetch nonce for address:", account.address, error);
+        throw error;
+    }
+
     const tx = {
         from: account.address,
         to: toAddress,
         value: web3.utils.toWei(amount, 'ether'),
         gas: 21000,
-        gasPrice: web3.utils.toWei('20', 'gwei')
+        gasPrice: web3.utils.toWei('20', 'gwei'),
+        nonce: nonce
     };
 
     return new Promise<{ sender: string, txHash: string, receipt: TransactionReceipt }>(async (resolve, reject) => {

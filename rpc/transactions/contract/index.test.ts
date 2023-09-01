@@ -17,7 +17,7 @@ import Router from "../../../node_modules/@uniswap/v2-periphery/build/UniswapV2R
 import ERC20 from "../../../node_modules/@openzeppelin/contracts/build/contracts/ERC20PresetFixedSupply.json";
 import WETH from "../../../node_modules/canonical-weth/build/contracts/WETH9.json";
 
-const { RPC_URL, SEND_FROM_PK, SEND_TO_ADDRESS, SEND_AMOUNT } = process.env;
+const { RPC_URL, SEND_FROM_PK } = process.env;
 const provider = new Web3.providers.HttpProvider(RPC_URL);
 const web3 = new Web3(provider);
 
