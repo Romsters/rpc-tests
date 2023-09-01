@@ -21,6 +21,25 @@ Issue the following commands:
     npm install;
     cp .env.gobi .env;
 
+## debug_* calls
+
+These tests require basic auth username and password to be set:
+
+    RPC_USERNAME=
+    RPC_PASSWORD=
+
+## Send Transaction Tests
+
+These tests require adding the Private Key (PK) of the sending wallet to the .env as:
+
+    SEND_FROM_PK=
+
+This should not be committed.
+
+To run EOA to EOA test:
+
+    npm run test-gobi rpc/transactions/eoa
+
 ### Running the tests
 
 To run the tests, ensure .env files exist then execute one of:
