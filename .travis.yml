@@ -22,19 +22,19 @@ script:
   # Test Commands
   - >
     if [ "$TEST_ENV" = "local" ]; then 
-      TEST_OUTPUT=$(docker run -e SEND_FROM_PK=$SEND_FROM_PK -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-local 2>&1);
+      TEST_OUTPUT=$(docker run -e SEND_FROM_PK=$SEND_FROM_PK -e RPC_USERNAME=$RPC_USERNAME -e RPC_PASSWORD=$RPC_PASSWORD -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-local 2>&1);
     fi
   - >
     if [ "$TEST_ENV" = "pregobi" ]; then 
-      TEST_OUTPUT=$(docker run -e SEND_FROM_PK=$SEND_FROM_PK -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi 2>&1);
+      TEST_OUTPUT=$(docker run -e SEND_FROM_PK=$SEND_FROM_PK -e RPC_USERNAME=$RPC_USERNAME -e RPC_PASSWORD=$RPC_PASSWORD -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-pregobi 2>&1);
     fi
   - >
     if [ "$TEST_ENV" = "gobi" ]; then 
-      TEST_OUTPUT=$(docker run -e SEND_FROM_PK=$SEND_FROM_PK -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi 2>&1);
+      TEST_OUTPUT=$(docker run -e SEND_FROM_PK=$SEND_FROM_PK -e RPC_USERNAME=$RPC_USERNAME -e RPC_PASSWORD=$RPC_PASSWORD -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi 2>&1);
     fi
   - >
     if [ "$TEST_ENV" = "eon" ]; then 
-      TEST_OUTPUT=$(docker run -e SEND_FROM_PK=$SEND_FROM_PK -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon 2>&1);
+      TEST_OUTPUT=$(docker run -e SEND_FROM_PK=$SEND_FROM_PK -e RPC_USERNAME=$RPC_USERNAME -e RPC_PASSWORD=$RPC_PASSWORD -v $(pwd):/usr/src/app -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-eon 2>&1);
     fi
 
   - echo "$TEST_OUTPUT";
@@ -63,5 +63,15 @@ script:
   # Send data to Slack
   - >
     curl -X POST -H 'Content-type: application/json'
-    --data "{\"failed_suites\": \"$failed_suites\", \"passed_suites\": \"$passed_suites\", \"total_suites\": \"$total_suites\", \"failed_tests\": \"$failed_tests\", \"passed_tests\": \"$passed_tests\", \"total_tests\": \"$total_tests\", \"total_time\": \"$total_time\", \"build_url\": \"$TRAVIS_BUILD_WEB_URL\"}"
+    --data "{
+      \"failed_suites\": \"$failed_suites\", 
+      \"passed_suites\": \"$passed_suites\", 
+      \"total_suites\": \"$total_suites\", 
+      \"failed_tests\": \"$failed_tests\", 
+      \"passed_tests\": \"$passed_tests\", 
+      \"total_tests\": \"$total_tests\", 
+      \"total_time\": \"$total_time\", 
+      \"build_url\": \"$TRAVIS_BUILD_WEB_URL\",
+      \"branch\": \"$TRAVIS_BRANCH\"
+    }"
     $SLACK_WEBHOOK_URL
