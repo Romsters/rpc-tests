@@ -60,8 +60,22 @@ script:
   - "[ -z \"$total_tests\" ] && total_tests=0 || true"
   - "[ -z \"$total_time\" ] && total_time=0 || true"
 
+  # Determine test outcome and symbols to send to slack
+  - >
+    if [ "$failed_tests" = "0" ]; then
+      test_outcome=":large_green_circle:  ALL TESTS PASSED  :large_green_circle: "
+      passed_tests_symbol=":large_green_circle: "
+    elif [ "$passed_tests" = "0" ]; then
+      test_outcome=":red_circle:  ALL TESTS FAILED  :red_circle: "
+      failed_tests_symbol=":red_circle: "
+    else
+      test_outcome=":red_circle:  TESTS FAILED  :red_circle: "
+      passed_tests_symbol=":large_green_circle: "
+      failed_tests_symbol=":red_circle: "
+    fi
+
   # Send data to Slack
   - >
-    curl -X POST -H 'Content-type: application/json'
-    --data "{\"failed_suites\": \"$failed_suites\", \"passed_suites\": \"$passed_suites\", \"total_suites\": \"$total_suites\", \"failed_tests\": \"$failed_tests\", \"passed_tests\": \"$passed_tests\", \"total_tests\": \"$total_tests\", \"total_time\": \"$total_time\", \"build_url\": \"$TRAVIS_BUILD_WEB_URL\", \"branch\": \"$TRAVIS_BRANCH\"}"
+    curl -X POST -H 'Content-type: application/json' 
+    --data "{\"failed_suites\": \"$failed_suites\", \"passed_suites\": \"$passed_suites\", \"total_suites\": \"$total_suites\", \"failed_tests\": \"$failed_tests\", \"passed_tests\": \"$passed_tests\", \"total_tests\": \"$total_tests\", \"total_time\": \"$total_time\", \"build_url\": \"$TRAVIS_BUILD_WEB_URL\", \"branch\": \"$TRAVIS_BRANCH\", \"test_outcome\": \"$test_outcome\", \"passed_tests_symbol\": \"$passed_tests_symbol\", \"failed_tests_symbol\": \"$failed_tests_symbol\", \"environment\": \"$TEST_ENV\"}" 
     $SLACK_WEBHOOK_URL
