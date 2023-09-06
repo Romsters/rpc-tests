@@ -66,12 +66,12 @@ script:
       test_outcome=":large_green_circle:  ALL TESTS PASSED  :large_green_circle: "
       passed_tests_symbol=":large_green_circle: "
     elif [ "$passed_tests" = "0" ]; then
-      test_outcome=":large_red_circle:  ALL TESTS FAILED  :large_red_circle: "
-      failed_tests_symbol=":large_red_circle: "
+      test_outcome=":red_circle:  ALL TESTS FAILED  :red_circle: "
+      failed_tests_symbol=":red_circle: "
     else
-      test_outcome=":large_red_circle:  TESTS FAILED  :large_red_circle: "
+      test_outcome=":red_circle:  TESTS FAILED  :red_circle: "
       passed_tests_symbol=":large_green_circle: "
-      failed_tests_symbol=":large_red_circle: "
+      failed_tests_symbol=":red_circle: "
     fi
 
   # Send data to Slack
