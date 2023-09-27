@@ -14,6 +14,7 @@ describe("zen_getFeePayments", () => {
           value: new RegExp(schema.uint.pattern),
         }],
       },
+      expectNullResult: true
     });
   });
 });

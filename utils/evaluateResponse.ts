@@ -122,13 +122,21 @@ function reduceValue(value, pattern) {
   }
 }
 
-function evaluateResponse({ response, pattern }) {
+function evaluateResponse({ response, pattern, expectNullResult = false }) {
   const { jsonrpc, id, result: value, error } = response;
   if (error) throw new Error(`Error: ${JSON.stringify(error, null, 2)}`);
 
   expect(jsonrpc).toBe(fixtures.jsonrpc);
   expect(id).toBe(fixtures.id);
-  reduceValue(value, pattern);
+
+  if (expectNullResult) {
+    expect(value).toBeNull();
+  } else {
+    if (value === null) {
+      throw new Error('Unexpected null result');
+    }
+    reduceValue(value, pattern);
+  }
 
   if (process.env.DEV_MODE === "true") {
     console.log("response:", response, "\n", "pattern:",pattern);
