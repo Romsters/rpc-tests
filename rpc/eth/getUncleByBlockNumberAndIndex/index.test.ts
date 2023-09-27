@@ -7,6 +7,7 @@ describe("eth_getUncleByBlockNumberAndIndex", () => {
     evaluateResponse({
       response: await eth_getUncleByBlockNumberAndIndex(),
       pattern: null,
+      expectNullResult: true,
     });
   });
 });
