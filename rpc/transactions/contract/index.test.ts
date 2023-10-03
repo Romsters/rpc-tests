@@ -96,7 +96,7 @@ describe("Contract Deployment & Interaction", () => {
         expect(receipt).toBeTruthy();
         expect(Number(receipt.status)).toBe(1);
         expect(receipt).toHaveProperty('transactionHash', transactionHash);
-    }, 3600000);
+    }, 3600000, { tags: 'transaction'});
 });
 
 const approveAndCheck = async (web3: Web3, token: Contract<any>, spender: string, amount: string, sender: string) => {

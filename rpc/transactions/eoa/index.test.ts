@@ -50,6 +50,6 @@ describe("web3_sendTransaction", () => {
         // Confirm the difference in the receiver's balance
         const amountReceivedInWei = web3.utils.toWei(SEND_AMOUNT, 'ether');
         expect(new BN(newReceiverBalance).sub(new BN(initialReceiverBalance)).toString()).toBe(amountReceivedInWei);
-    }, 60000);
+    }, 60000, { tags: 'transaction'});
 });
 
