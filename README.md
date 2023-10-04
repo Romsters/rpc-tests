@@ -14,22 +14,51 @@ Issue the following commands:
 
     git clone git@github.com:HorizenOfficial/rpc-tests.git;
     cd rpc-tests;
+
+
     git submodule add --force git@github.com:ethereum/execution-apis.git;
     git submodule update --init;
     npm install;
-    cp .env.local.example .env;
+    cp .env.gobi .env;
+
+## debug_* calls
+
+These tests require basic auth username and password to be set:
+
+    RPC_USERNAME=
+    RPC_PASSWORD=
+
+## Send Transaction Tests
+
+These tests require adding the Private Key (PK) of the sending wallet to the .env as:
+
+    SEND_FROM_PK=
+
+This should not be committed.
+
+To run EOA to EOA test:
+
+    npm run test-gobi rpc/transactions/eoa
 
 ### Running the tests
 
-To run the tests, simply issue:
+To run the tests, ensure .env files exist then execute one of:
 
-    npm run test;
+    npm run test-local
+    npm run test-pregobi
+    npm run test-gobi
+    npm run test-eon
+
+### Running with Docker
+
+    docker build -t rpc-tests .
+    docker run -v $(pwd)/reports:/usr/src/app/reports rpc-tests npm run test-gobi
 
 ### Running test for a specific namespace
 
 You can run tests for a specific RPC namespace such as `rpc/eth` by issuing the following command:
 
-    npm run test rpc/eth
+    npm run test rpc/eth;
 
 ### Running test for a specific RPC method
 
