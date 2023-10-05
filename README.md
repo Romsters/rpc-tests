@@ -30,11 +30,12 @@ These tests require basic auth username and password to be set:
 
 ## Send Transaction Tests
 
-These tests require adding the Private Key (PK) of the sending wallet to the .env as:
+These tests require adding 2 Private Keys (PKs) of the sending wallets to the .env as:
 
     SEND_FROM_PK=
+    SEND_FROM_PK2=
 
-This should not be committed.
+This should not be committed.  We use multiple wallets so that nonce values are not confused during parallel testing.
 
 To run EOA to EOA test:
 

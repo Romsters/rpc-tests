@@ -5,6 +5,7 @@ import ERC20 from "../../../node_modules/@openzeppelin/contracts/build/contracts
 import WETH from "../../../node_modules/canonical-weth/build/contracts/WETH9.json";
 import { Contract } from "web3-eth-contract"
 import { getCurrentDateTokens } from "../../../utils/web3utils";
+import {rootCertificates} from "tls";
 
 export const deployWeth: (web3: Web3, sender: string) => Promise<string | undefined> = async (web3, sender) => {
     const wethContract = new web3.eth.Contract(WETH.abi as any);
@@ -134,7 +135,7 @@ export const approve = async (
     spender: string,
     amount: string,
     sender: string
-): Promise<{transactionHash?: string, receipt?: any}> => {
+): Promise<{ transactionHash?: string, receipt?: any }> => {
     let estimatedGas;
 
     try {
@@ -161,27 +162,26 @@ export const approve = async (
 
     const signedTx = await web3.eth.accounts.signTransaction(tx, process.env.SEND_FROM_PK);
 
-    const transactionHashPromise = new Promise<string>((resolve, reject) => {
+    let transactionHash;
+    let receipt;
+
+    const transactionResultPromise = new Promise<{ transactionHash?: string, receipt?: any }>((resolve, reject) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction!)
             .on('transactionHash', function (hash) {
-                resolve(hash.toString());
+                transactionHash = hash.toString();
+                console.log("approve transactionHash: " + transactionHash);
             })
-            .on('error', reject);
-    });
-
-    const receiptPromise = new Promise<any>((resolve, reject) => {
-        web3.eth.sendSignedTransaction(signedTx.rawTransaction!)
             .on('receipt', function (rec) {
-                resolve(rec);
+                receipt = rec;
+                resolve({ transactionHash, receipt });
             })
             .on('error', reject);
     });
 
     try {
-        const [transactionHash, receipt] = await Promise.all([transactionHashPromise, receiptPromise]);
-        return { transactionHash, receipt };
+        return await transactionResultPromise;
     } catch (error) {
-        console.error("Error sending transaction:", error);
+        console.error("Error sending 'approve'", error);
         throw error;
     }
 }
@@ -197,7 +197,7 @@ export const addLiquidity = async (
     amountBMin: string,
     sender: string,
     deadline: string
-): Promise<{transactionHash?: string, receipt?: any}> => {
+): Promise<{ transactionHash?: string, receipt?: any }> => {
     let estimatedGas;
 
     try {
@@ -242,27 +242,26 @@ export const addLiquidity = async (
 
     const signedTx = await web3.eth.accounts.signTransaction(tx, process.env.SEND_FROM_PK);
 
-    const transactionHashPromise = new Promise<string>((resolve, reject) => {
+    let transactionHash;
+    let receipt;
+
+    const transactionResultPromise = new Promise<{ transactionHash?: string, receipt?: any }>((resolve, reject) => {
         web3.eth.sendSignedTransaction(signedTx.rawTransaction!)
             .on('transactionHash', function (hash) {
-                resolve(hash.toString());
+                transactionHash = hash.toString();
+                console.log("addLiquidity transactionHash: " + transactionHash);
             })
-            .on('error', reject);
-    });
-
-    const receiptPromise = new Promise<any>((resolve, reject) => {
-        web3.eth.sendSignedTransaction(signedTx.rawTransaction!)
             .on('receipt', function (rec) {
-                resolve(rec);
+                receipt = rec;
+                resolve({ transactionHash, receipt });
             })
             .on('error', reject);
     });
 
     try {
-        const [transactionHash, receipt] = await Promise.all([transactionHashPromise, receiptPromise]);
-        return { transactionHash, receipt };
+        return await transactionResultPromise;
     } catch (error) {
-        console.error("Error sending transaction:", error);
+        console.error("Error sending 'addLiquidity'", error);
         throw error;
     }
 }
