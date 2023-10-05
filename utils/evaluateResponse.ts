@@ -135,6 +135,7 @@ function evaluateResponse({ response, pattern, expectNullResult = false }) {
     if (value === null) {
       throw new Error('Unexpected null result');
     }
+
     reduceValue(value, pattern);
   }
 

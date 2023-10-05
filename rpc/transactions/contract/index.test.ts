@@ -69,9 +69,13 @@ describe("Contract Deployment & Interaction", () => {
         const amountB = "1000000000";
 
         await approveAndCheck(web3, tokenA, spender, amountA, account.address);
+        console.log("Successfully called approve for tokenA/spender")
         await approveAndCheck(web3, tokenB, spender, amountB, account.address);
+        console.log("Successfully called approve for tokenB/spender")
         await approveAndCheck(web3, weth, wethAddress, amountA, account.address);
+        console.log("Successfully called approve for weth/wethAddress")
         await approveAndCheck(web3, weth, spender, amountA, account.address);
+        console.log("Successfully called approve for weth/spender")
 
         // deadline
         const time = Math.floor(Date.now() / 1000) + 200000;

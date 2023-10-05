@@ -181,7 +181,7 @@ export const approve = async (
         const [transactionHash, receipt] = await Promise.all([transactionHashPromise, receiptPromise]);
         return { transactionHash, receipt };
     } catch (error) {
-        console.error("Error sending transaction:", error);
+        console.error("Error sending 'approve' transaction:", error);
         throw error;
     }
 }
@@ -262,7 +262,7 @@ export const addLiquidity = async (
         const [transactionHash, receipt] = await Promise.all([transactionHashPromise, receiptPromise]);
         return { transactionHash, receipt };
     } catch (error) {
-        console.error("Error sending transaction:", error);
+        console.error("Error sending 'addLiquidity' transaction:", error);
         throw error;
     }
 }

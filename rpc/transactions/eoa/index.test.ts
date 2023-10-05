@@ -5,21 +5,21 @@ import { describe, expect } from "@jest/globals";
 import { formatPrivateKey } from "../../../utils/web3utils";
 import sendTransaction, {getReceipt} from "./index";
 
-const { RPC_URL, SEND_FROM_PK, SEND_TO_ADDRESS, SEND_AMOUNT } = process.env;
+const { RPC_URL, SEND_FROM_PK2, SEND_TO_ADDRESS, SEND_AMOUNT } = process.env;
 
 const provider = new Web3.providers.HttpProvider(RPC_URL);
 const web3 = new Web3(provider);
 
 describe("web3_sendTransaction", () => {
 
-    if (!SEND_FROM_PK) {
-        throw new Error("SEND_FROM_PK is missing from the environment variables. Please set it in the .env file.");
+    if (!SEND_FROM_PK2) {
+        throw new Error("SEND_FROM_PK2 is missing from the environment variables. Please set it in the .env file.");
     }
 
     it("Sends a future nonce transaction, checks the mempool and then sends the correct nonce from EOA to EOA " +
         "and confirms sender and receiver balance changes for both transactions.", async () => {
 
-        const account = web3.eth.accounts.privateKeyToAccount(formatPrivateKey(web3, SEND_FROM_PK));
+        const account = web3.eth.accounts.privateKeyToAccount(formatPrivateKey(web3, SEND_FROM_PK2));
 
         // Get the initial balances of both addresses BEFORE the transaction
         const initialSenderBalance = await web3.eth.getBalance(account.address);
@@ -28,7 +28,7 @@ describe("web3_sendTransaction", () => {
         // Send the transaction with a future nonce
         const { txHash: futureTxHash } = await sendTransaction(
             web3,
-            SEND_FROM_PK,
+            SEND_FROM_PK2,
             SEND_TO_ADDRESS,
             SEND_AMOUNT,
             1
@@ -58,7 +58,7 @@ describe("web3_sendTransaction", () => {
 
         const { txHash, receipt } = await sendTransaction(
             web3,
-            SEND_FROM_PK,
+            SEND_FROM_PK2,
             SEND_TO_ADDRESS,
             SEND_AMOUNT
         );
@@ -70,9 +70,16 @@ describe("web3_sendTransaction", () => {
         const futureReceipt = await getReceipt(web3, futureTxHash);
         expect(futureReceipt.transactionHash).toBe(futureTxHash);
 
-        // Calculate gas costs for both transactions
-        const gasCostForTx = new BN(receipt.gasUsed).mul(new BN(web3.utils.toWei('20', 'gwei')));
-        const gasCostForFutureTx = new BN(futureReceipt.gasUsed).mul(new BN(web3.utils.toWei('20', 'gwei')));
+        // Get the transaction to fetch the gas price used
+        const sentTransaction = await web3.eth.getTransaction(txHash);
+
+        // Use the gas price from the fetched transaction
+        const gasPriceForTx = new BN(sentTransaction.gasPrice);
+        const gasCostForTx = new BN(receipt.gasUsed).mul(gasPriceForTx);
+
+        const futureTransaction = await web3.eth.getTransaction(futureTxHash);
+        const gasPriceForFutureTx = new BN(futureTransaction.gasPrice);
+        const gasCostForFutureTx = new BN(futureReceipt.gasUsed).mul(gasPriceForFutureTx);
 
         // Calculate total costs for both transactions
         const totalSentAmountForTx = new BN(web3.utils.toWei(SEND_AMOUNT, 'ether')).add(gasCostForTx);
