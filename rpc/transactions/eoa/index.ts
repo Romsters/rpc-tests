@@ -1,4 +1,5 @@
 import { Web3 } from "web3";
+import BN from "bn.js";
 import { formatPrivateKey } from "../../../utils/web3utils";
 
 type TransactionReceipt = {
@@ -10,18 +11,26 @@ type TransactionReceipt = {
     gasUsed: number;
 };
 
-const sendTransaction = async (web3: Web3, privateKey: string, toAddress: string, amount: string):
-    Promise<{ txHash: string, receipt: TransactionReceipt }> => {
+export const getReceipt = async (web3: Web3, txHash: string): Promise<TransactionReceipt> => {
+    while (true) {
+        const receipt = await web3.eth.getTransactionReceipt(txHash);
+        if (receipt) {
+            return receipt as TransactionReceipt;
+        }
+        await new Promise(res => setTimeout(res, 1000));
+    }
+};
+
+const sendTransaction = async (
+    web3: Web3,
+    privateKey: string,
+    toAddress: string,
+    amount: string,
+    nonceOffset: number = 0
+): Promise<{ sender: string, txHash: string, receipt?: TransactionReceipt }> => {
 
     const account = web3.eth.accounts.privateKeyToAccount(formatPrivateKey(web3, privateKey));
-
-    let nonce;
-    try {
-        nonce = await web3.eth.getTransactionCount(account.address, 'pending');
-    } catch (error) {
-        console.error("Failed to fetch nonce for address:", account.address, error);
-        throw error;
-    }
+    const nonce = new BN(await web3.eth.getTransactionCount(account.address, 'pending')).add(new BN(nonceOffset));
 
     const tx = {
         from: account.address,
@@ -29,20 +38,30 @@ const sendTransaction = async (web3: Web3, privateKey: string, toAddress: string
         value: web3.utils.toWei(amount, 'ether'),
         gas: 21000,
         gasPrice: web3.utils.toWei('20', 'gwei'),
-        nonce: nonce
+        nonce: nonce.toString()
     };
 
-    return new Promise<{ sender: string, txHash: string, receipt: TransactionReceipt }>(async (resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const signedTx = await account.signTransaction(tx);
+            let transactionHash;
+            let resolved = false;
+
             web3.eth.sendSignedTransaction(signedTx.rawTransaction)
                 .once('transactionHash', (hash: string) => {
                     console.log(`Transaction hash: ${hash}`);
+                    transactionHash = hash;
+                    if (nonceOffset !== 0 && !resolved) {
+                        resolved = true;
+                        resolve({ sender: account.address, txHash: hash });
+                    }
                 })
                 .once('receipt', (receipt: TransactionReceipt) => {
-                    resolve({ sender: account.address, txHash: receipt.transactionHash, receipt });
+                    if (resolved) return;
+                    resolved = true;
+                    resolve({ sender: account.address, txHash: transactionHash, receipt });
                 })
-                .on('error', (error) => {
+                .once('error', (error) => {
                     reject(error);
                 });
         } catch (error) {
