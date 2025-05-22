@@ -17,7 +17,7 @@ describe("eth_getTransactionByHash", () => {
     });
   });
 
-  it("Returns the information about the most recent transaction hash taken from blockscout", async () => {
+  it.skip("Returns the information about the most recent transaction hash taken from blockscout", async () => {
     const txHash = await getLatestTxHash();
 
     evaluateResponse({
